@@ -29,5 +29,9 @@ const addTransaction = asyncHandler(async (req, res) => {
   res.status(201).json(transaction);
 });
 
+const getTransactions = asyncHandler(async (req, res) => {
+    const transactions = await Transaction.find({ userId: req.user._id }).populate("accountId");
+    res.status(200).json(transactions);
+  });
 
 module.exports = { addTransaction,getTransactions };
