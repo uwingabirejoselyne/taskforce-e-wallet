@@ -14,9 +14,11 @@ app.use(cookieParser());
 const userRoute = require('./routes/userRoute')
 const accountRoutes = require("./routes/accountRoute");
 const transactionRoutes = require("./routes/transactionRoute");
+const budgetRoutes =require("./routes/budgetRoutes")
 app.use('/api/user',userRoute)
 app.use("/api/accounts", accountRoutes);
 app.use("/api/transactions", transactionRoutes);
+app.use("/api/budget", budgetRoutes);
 const PORT = process.env.PORT || 4000;
 dbConnect();
 app.listen(PORT, () => {
