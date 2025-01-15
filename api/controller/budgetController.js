@@ -27,6 +27,7 @@ const setBudget = asyncHandler(async (req, res) => {
 
 const checkBudget = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user._id);
+  
 
   if (!user) {
     res.status(404);
@@ -34,10 +35,11 @@ const checkBudget = asyncHandler(async (req, res) => {
   }
 
   const totalExpenses = await Transaction.aggregate([
-    { $match: { userId: user._id, type: "expense" } },
+    { $match: { userId: user._id.toString(), type: "expense" } },
     { $group: { _id: null, total: { $sum: "$amount" } } },
   ]);
 
+  
   const total = totalExpenses[0]?.total || 0;
 
   const exceeded = total > user.budget;

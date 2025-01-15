@@ -1,33 +1,64 @@
 const asyncHandler = require("express-async-handler");
 const Transaction = require("../models/transactionModel");
 const Account = require("../models/accountModel");
+const User = require("../models/userModel");
 
 // Add a transaction
-const addTransaction = asyncHandler(async (req, res) => {
-  const { accountId, type, amount, category, description } = req.body;
+// const addTransaction = asyncHandler(async (req, res) => {
+//   const { accountId, type, amount, category, description } = req.body;
 
-  const account = await Account.findById(accountId);
+//   const account = await Account.findById(accountId);
   
-  if (!account) {
-    res.status(404);
-    throw new Error("Account not found");
-  }
+//   if (!account) {
+//     res.status(404);
+//     throw new Error("Account not found");
+//   }
+
+//   const transaction = await Transaction.create({
+//     userId: req.user._id,
+//     accountId,
+//     type,
+//     amount,
+//     category,
+//     description,
+//   });
+
+//   // Update account balance
+//   account.balance += type === "income" ? amount : -amount;
+//   await account.save();
+
+//   res.status(201).json(transaction);
+// });
+
+const addTransaction = asyncHandler(async (req, res) => {
+  const { type, amount } = req.body;
 
   const transaction = await Transaction.create({
+    ...req.body,
     userId: req.user._id,
-    accountId,
-    type,
-    amount,
-    category,
-    description,
   });
 
-  // Update account balance
-  account.balance += type === "income" ? amount : -amount;
-  await account.save();
+  if (type === "expense") {
+    // Check if the budget is exceeded
+    const user = await User.findById(req.user._id);
+    const totalExpenses = await Transaction.aggregate([
+      { $match: { userId: user._id.toString(), type: "expense" } },
+      { $group: { _id: null, total: { $sum: "$amount" } } },
+    ]);
 
-  res.status(201).json(transaction);
+    const total = totalExpenses[0]?.total || 0;
+    if (total > user.budget) {
+      return res.status(201).json({
+        message: "Transaction added, but budget exceeded!",
+        transaction,
+        exceeded: true,
+      });
+    }
+  }
+
+  res.status(201).json({ message: "Transaction added successfully", transaction });
 });
+
 
 const generateReport = asyncHandler(async (req, res) => {
     const { startDate, endDate } = req.query;
