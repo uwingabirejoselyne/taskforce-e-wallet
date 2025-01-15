@@ -25,31 +25,30 @@ const setBudget = asyncHandler(async (req, res) => {
   res.status(200).json({ message: "Budget updated successfully", budget: user.budget });
 });
 
-// Check if the budget is exceeded
-// const checkBudget = asyncHandler(async (req, res) => {
-//   const user = await User.findById(req.user._id);
+const checkBudget = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user._id);
 
-//   if (!user) {
-//     res.status(404);
-//     throw new Error("User not found");
-//   }
+  if (!user) {
+    res.status(404);
+    throw new Error("User not found");
+  }
 
-//   const totalExpenses = await Transaction.aggregate([
-//     { $match: { userId: user._id, type: "expense" } },
-//     { $group: { _id: null, total: { $sum: "$amount" } } },
-//   ]);
+  const totalExpenses = await Transaction.aggregate([
+    { $match: { userId: user._id, type: "expense" } },
+    { $group: { _id: null, total: { $sum: "$amount" } } },
+  ]);
 
-//   const total = totalExpenses[0]?.total || 0;
+  const total = totalExpenses[0]?.total || 0;
 
-//   const exceeded = total > user.budget;
-//   res.status(200).json({
-//     exceeded,
-//     totalExpense: total,
-//     budget: user.budget,
-//     message: exceeded
-//       ? "Budget exceeded!"
-//       : "You are within your budget",
-//   });
-// });
+  const exceeded = total > user.budget;
+  res.status(200).json({
+    exceeded,
+    totalExpense: total,
+    budget: user.budget,
+    message: exceeded
+      ? "Budget exceeded!"
+      : "You are within your budget",
+  });
+});
 
-module.exports = { setBudget};
+module.exports = { setBudget,checkBudget};
