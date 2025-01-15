@@ -26,7 +26,8 @@ var userSchema = new mongoose.Schema({
       password: {
         type: String,
         required: true,
-      }
+      },
+      budget: { type: Number, default: 0 },
 });
 
 userSchema.pre("save", async function (next) {
