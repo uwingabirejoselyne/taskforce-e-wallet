@@ -3,11 +3,13 @@ const Account = require("../models/accountModel");
 
 // Add a new account
 const addAccount = asyncHandler(async (req, res) => {
-  const { name } = req.body;
-
+  const { name,balance } = req.body;
+ console.log(name);
+ 
   const account = await Account.create({
     userId: req.user._id,
     name,
+    balance
   });
 
   res.status(201).json(account);
@@ -15,4 +17,4 @@ const addAccount = asyncHandler(async (req, res) => {
 
 
 
-module.exports = { addAccount, getAccounts };
+module.exports = { addAccount};
