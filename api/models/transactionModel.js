@@ -3,12 +3,12 @@ const mongoose = require("mongoose");
 const transactionSchema = new mongoose.Schema(
   {
     userId: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: String,
       ref: "User",
       required: true,
     },
     accountId: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: String,
       ref: "Account",
       required: true,
     },

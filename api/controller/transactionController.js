@@ -7,6 +7,7 @@ const addTransaction = asyncHandler(async (req, res) => {
   const { accountId, type, amount, category, description } = req.body;
 
   const account = await Account.findById(accountId);
+  
   if (!account) {
     res.status(404);
     throw new Error("Account not found");
@@ -29,4 +30,4 @@ const addTransaction = asyncHandler(async (req, res) => {
 });
 
 
-module.exports = { addTransaction };
+module.exports = { addTransaction,getTransactions };

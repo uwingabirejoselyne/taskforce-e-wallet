@@ -13,8 +13,10 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 const userRoute = require('./routes/userRoute')
 const accountRoutes = require("./routes/accountRoute");
+const transactionRoutes = require("./routes/transactionRoute");
 app.use('/api/user',userRoute)
 app.use("/api/accounts", accountRoutes);
+app.use("/api/transactions", transactionRoutes);
 const PORT = process.env.PORT || 4000;
 dbConnect();
 app.listen(PORT, () => {
