@@ -32,6 +32,7 @@ const transactionSchema = new mongoose.Schema(
     description: {
       type: String,
     },
+    categoryId: { type: String, ref: "Category", default: null },
   },
   { timestamps: true }
 );

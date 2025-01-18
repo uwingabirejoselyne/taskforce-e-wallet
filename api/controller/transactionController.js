@@ -2,6 +2,7 @@ const asyncHandler = require("express-async-handler");
 const Transaction = require("../models/transactionModel");
 const Account = require("../models/accountModel");
 const User = require("../models/userModel");
+const Category = require("../models/categoryModel")
 
 // Add a transaction
 // const addTransaction = asyncHandler(async (req, res) => {
@@ -31,21 +32,43 @@ const User = require("../models/userModel");
 // });
 
 const addTransaction = asyncHandler(async (req, res) => {
-  const { type, amount, accountId } = req.body;
+  const { type, amount, accountId, categoryId } = req.body;
 
-  // Create the transaction
-  const transaction = await Transaction.create({
-    ...req.body,
-    userId: req.user._id,
-  });
-
-  // Update account balance
+  // Validate and find the account
   const account = await Account.findById(accountId);
   if (!account) {
     res.status(404);
     throw new Error("Account not found");
   }
 
+  // Handle category validation only for expenses
+  let category = null;
+  if (type === "expense") {
+    if (!categoryId) {
+      res.status(400);
+      return res.json({ error: "Category is required for expense transactions" });
+    }
+
+    try {
+      category = await Category.findById(categoryId);
+      if (!category) {
+        res.status(404);
+        return res.json({ error: "Category not found. Please provide a valid category ID." });
+      }
+    } catch (error) {
+      res.status(400);
+      return res.json({ error: "Invalid category ID format. Please provide a valid ObjectId." });
+    }
+  }
+
+  // Create the transaction
+  const transaction = await Transaction.create({
+    ...req.body,
+    userId: req.user._id,
+    category: type === "expense" ? categoryId : undefined, // Link category only for expenses
+  });
+
+  // Update account balance
   account.balance += type === "income" ? amount : -amount;
   await account.save();
 
@@ -74,6 +97,9 @@ const addTransaction = asyncHandler(async (req, res) => {
     updatedBalance: account.balance, // Optional: Include updated balance in response
   });
 });
+
+
+
 
 
 const generateReport = asyncHandler(async (req, res) => {
