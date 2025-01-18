@@ -1,11 +1,9 @@
-require('dotenv').config(); // Load environment variables
+require('dotenv').config(); 
 
 const express = require('express');
 const dbConnect = require('./config/dbConnect');
 const bodyParser = require("body-parser");
 const cookieParser = require('cookie-parser');
-
-
 
 const app = express();
 app.use(bodyParser.json());
@@ -15,10 +13,12 @@ const userRoute = require('./routes/userRoute')
 const accountRoutes = require("./routes/accountRoute");
 const transactionRoutes = require("./routes/transactionRoute");
 const budgetRoutes =require("./routes/budgetRoutes")
+const categoryRoute =require("./routes/categoryRoute")
 app.use('/api/user',userRoute)
 app.use("/api/accounts", accountRoutes);
 app.use("/api/transactions", transactionRoutes);
 app.use("/api/budget", budgetRoutes);
+app.use("/api/category", categoryRoute)
 const PORT = process.env.PORT || 4000;
 dbConnect();
 app.listen(PORT, () => {
