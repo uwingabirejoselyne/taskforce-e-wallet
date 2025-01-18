@@ -4,32 +4,6 @@ const Account = require("../models/accountModel");
 const User = require("../models/userModel");
 const Category = require("../models/categoryModel")
 
-// Add a transaction
-// const addTransaction = asyncHandler(async (req, res) => {
-//   const { accountId, type, amount, category, description } = req.body;
-
-//   const account = await Account.findById(accountId);
-  
-//   if (!account) {
-//     res.status(404);
-//     throw new Error("Account not found");
-//   }
-
-//   const transaction = await Transaction.create({
-//     userId: req.user._id,
-//     accountId,
-//     type,
-//     amount,
-//     category,
-//     description,
-//   });
-
-//   // Update account balance
-//   account.balance += type === "income" ? amount : -amount;
-//   await account.save();
-
-//   res.status(201).json(transaction);
-// });
 
 const addTransaction = asyncHandler(async (req, res) => {
   const { type, amount, accountId, categoryId } = req.body;
@@ -98,10 +72,6 @@ const addTransaction = asyncHandler(async (req, res) => {
   });
 });
 
-
-
-
-
 const generateReport = asyncHandler(async (req, res) => {
     const { startDate, endDate } = req.query;
   
@@ -152,4 +122,21 @@ const getTransactions = asyncHandler(async (req, res) => {
     res.status(200).json(transactions);
   });
 
-module.exports = { addTransaction,getTransactions,generateReport };
+  const getTransactionSummary = asyncHandler(async (req, res) => {
+    const summary = await Transaction.aggregate([
+      { $match: { userId: req.user._id } },
+      {
+        $group: {
+          _id: "$categoryId",
+          totalAmount: { $sum: "$amount" },
+          transactions: { $push: "$$ROOT" },
+        },
+      },
+      { $lookup: { from: "categories", localField: "_id", foreignField: "_id", as: "category" } },
+      { $unwind: "$category" },
+    ]);
+  
+    res.status(200).json(summary);
+  });
+  
+module.exports = { addTransaction,getTransactions,generateReport,getTransactionSummary };
