@@ -31,15 +31,26 @@ const User = require("../models/userModel");
 // });
 
 const addTransaction = asyncHandler(async (req, res) => {
-  const { type, amount } = req.body;
+  const { type, amount, accountId } = req.body;
 
+  // Create the transaction
   const transaction = await Transaction.create({
     ...req.body,
     userId: req.user._id,
   });
 
+  // Update account balance
+  const account = await Account.findById(accountId);
+  if (!account) {
+    res.status(404);
+    throw new Error("Account not found");
+  }
+
+  account.balance += type === "income" ? amount : -amount;
+  await account.save();
+
+  // Check if the budget is exceeded for expenses
   if (type === "expense") {
-    // Check if the budget is exceeded
     const user = await User.findById(req.user._id);
     const totalExpenses = await Transaction.aggregate([
       { $match: { userId: user._id.toString(), type: "expense" } },
@@ -52,11 +63,16 @@ const addTransaction = asyncHandler(async (req, res) => {
         message: "Transaction added, but budget exceeded!",
         transaction,
         exceeded: true,
+        updatedBalance: account.balance, // Optional: Include updated balance in response
       });
     }
   }
 
-  res.status(201).json({ message: "Transaction added successfully", transaction });
+  res.status(201).json({
+    message: "Transaction added successfully",
+    transaction,
+    updatedBalance: account.balance, // Optional: Include updated balance in response
+  });
 });
 
 
