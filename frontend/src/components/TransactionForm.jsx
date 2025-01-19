@@ -55,6 +55,9 @@ const TransactionForm = ({ categories, accounts }) => {
         setAmount("");
         setCategory("");
         alert("Transaction added successfully");
+
+        // refresh the page
+        window.location.reload();
       }
     } catch (error) {
       console.error("Error adding transaction:", error);

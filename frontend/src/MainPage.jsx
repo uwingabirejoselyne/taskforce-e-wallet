@@ -11,6 +11,7 @@ import {
   TableRow,
   TableCell,
   TableBody,
+  Badge,
 } from "@mui/material";
 import ModalWrapper from "./components/ModalWrapper";
 import TransactionForm from "./components/TransactionForm";
@@ -34,20 +35,14 @@ const MainPage = () => {
   const [budget, setBudget] = useState(0);
   const [transactions, setTransactions] = useState([]);
   const [incomeExpenseData, setIncomeExpenseData] = useState([]);
+  const [categoryData, setCategoryData] = useState([]);
   const { user } = useAuth();
-
-  const categoryData = [
-    { category: "Food", amount: 200 },
-    { category: "Travel", amount: 100 },
-    { category: "Entertainment", amount: 50 },
-    { category: "Miscellaneous", amount: 150 },
-  ];
 
   useEffect(() => {
     const fetchBudget = async () => {
       try {
         const response = await api.get("/budget/check");
-        setBudget(new Intl.NumberFormat("en-US").format(response.data?.budget));
+        setBudget(response.data?.budget);
       } catch (error) {
         console.error("Error fetching Budget:", error);
       }
@@ -86,6 +81,9 @@ const MainPage = () => {
   useEffect(() => {
     const fetchTransactions = async () => {
       try {
+        const catsRes = await api.get("/category");
+        const cats = catsRes.data;
+
         const response = await api.get("/transactions");
         setTransactions(
           response.data.map((transaction) => ({
@@ -94,10 +92,9 @@ const MainPage = () => {
             amount: transaction.amount,
             type: transaction.type,
             account: transaction.accountId.name,
-            category: categories.find(
-              (cat) => cat._id === transaction.categoryId
-            ),
-            date: transaction.date,
+            category: cats.find((cat) => cat._id === transaction.categoryId)
+              .name,
+            date: new Date(transaction.date).toISOString().split("T")[0],
           }))
         );
 
@@ -112,6 +109,15 @@ const MainPage = () => {
           { type: "Income", amount: income },
           { type: "Expense", amount: expense },
         ]);
+
+        const categoryData = cats.map((cat) => ({
+          category: cat.name,
+          amount: response.data
+            .filter((transaction) => transaction.categoryId === cat._id)
+            .reduce((acc, curr) => acc + curr.amount, 0),
+        }));
+
+        setCategoryData(categoryData);
       } catch (error) {
         console.error("Error fetching accounts:", error);
       }
@@ -215,9 +221,28 @@ const MainPage = () => {
         <Grid item xs={12} sm={4}>
           <Card>
             <CardContent>
-              <Typography variant="h6">Budget Set</Typography>
+              <Typography variant="h6">
+                Budget Set
+                {/* add badge when out of budget */}
+                {
+                  // if budget is less than total expenses, show badge
+                  budget <
+                  transactions
+                    .filter((transaction) => transaction.type === "expense")
+                    .reduce((acc, curr) => acc + curr.amount, 0) ? (
+                    <Badge
+                      color="error"
+                      sx={{
+                        width: "50px",
+                        paddingX: 3,
+                      }}
+                      badgeContent="Out of Budget"
+                    />
+                  ) : null
+                }
+              </Typography>
               <Typography variant="h4" color="success">
-                {budget} Rwf
+                {new Intl.NumberFormat("en-US").format(budget)} Rwf
               </Typography>
             </CardContent>
           </Card>
