@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Button,
   Box,
@@ -21,6 +21,7 @@ import SubcategoryManager from "./components/SubcategoryManager";
 import AccountManager from "./components/AccountManager";
 import BudgetForm from "./components/BudgetForm";
 import { useAuth } from "./context/AuthContext";
+import api from "./api";
 
 const MainPage = () => {
   const [openTransactionModal, setOpenTransactionModal] = useState(false);
@@ -28,6 +29,7 @@ const MainPage = () => {
   const [openSubcategoryModal, setOpenSubcategoryModal] = useState(false);
   const [openAccountModal, setOpenAccountModal] = useState(false);
   const [openBudgetModal, setOpenBudgetModal] = useState(false);
+  const [budget, setBudget] = useState(0);
   const { user } = useAuth();
 
   // Mock Data
@@ -65,6 +67,19 @@ const MainPage = () => {
     { category: "Entertainment", amount: 50 },
     { category: "Miscellaneous", amount: 150 },
   ];
+
+  useEffect(() => {
+    const fetchBudget = async () => {
+      try {
+        const response = await api.get("/budget/check");
+        setBudget(new Intl.NumberFormat("en-US").format(response.data?.budget));
+      } catch (error) {
+        console.error("Error fetching Budget:", error);
+      }
+    };
+
+    fetchBudget();
+  }, []);
 
   return (
     <Box>
@@ -143,6 +158,16 @@ const MainPage = () => {
               <Typography variant="h6">Balance</Typography>
               <Typography variant="h4" color="success">
                 $1500
+              </Typography>
+            </CardContent>
+          </Card>
+        </Grid>
+        <Grid item xs={12} sm={4}>
+          <Card>
+            <CardContent>
+              <Typography variant="h6">Budget Set</Typography>
+              <Typography variant="h4" color="success">
+                {budget} Rwf
               </Typography>
             </CardContent>
           </Card>
@@ -268,10 +293,7 @@ const MainPage = () => {
         onClose={() => setOpenBudgetModal(false)}
         title="Set Budget"
       >
-        <BudgetForm
-          budgets={[]}
-          setBudget={(budget) => console.log("Set budget:", budget)}
-        />
+        <BudgetForm />
       </ModalWrapper>
     </Box>
   );

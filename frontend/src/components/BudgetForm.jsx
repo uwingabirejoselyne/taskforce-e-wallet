@@ -1,9 +1,37 @@
-import React from "react";
+import React, { useState } from "react";
 import { Box, TextField, Button, Typography } from "@mui/material";
+import api from "../api";
+import { useAuth } from "../context/AuthContext";
 
-const BudgetForm = ({ budget, setBudget }) => {
+const BudgetForm = () => {
+  const [budget, setBudget] = useState(0);
+  const { user } = useAuth();
+
   const handleBudgetChange = (e) => {
-    setBudget(parseFloat(e.target.value) || 0);
+    setBudget(e.target.value);
+  };
+
+  const handleBudget = async () => {
+    try {
+      const response = await api.post(
+        "/budget/set",
+        { budget },
+        {
+          headers: {
+            Authorization: `Bearer ${user.token}`,
+          },
+        }
+      );
+
+      if (response.status !== 200) {
+        alert("Budget setting failed");
+        return;
+      }
+
+      alert("Budget set successfully");
+    } catch (error) {
+      console.error("Error adding account:", error);
+    }
   };
 
   return (
@@ -20,11 +48,7 @@ const BudgetForm = ({ budget, setBudget }) => {
         fullWidth
         sx={{ mb: 2 }}
       />
-      <Button
-        variant="contained"
-        color="primary"
-        onClick={() => alert("Budget Set!")}
-      >
+      <Button variant="contained" color="primary" onClick={handleBudget}>
         Save Budget
       </Button>
     </Box>
