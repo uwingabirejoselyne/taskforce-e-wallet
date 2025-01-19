@@ -1,48 +1,46 @@
 import React, { useState } from "react";
-import {
-  Box,
-  TextField,
-  Button,
-  Typography,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-} from "@mui/material";
+import { Box, TextField, Button, Typography, Grid } from "@mui/material";
+import api from "../api";
+import { useAuth } from "../context/AuthContext";
 
-const CategoryManager = ({ categories, addCategory }) => {
-  const [type, setType] = useState("Expense");
-  const [category, setCategory] = useState("");
-  const [subcategory, setSubcategory] = useState("");
+const CategoryManager = ({ categories, setCategories }) => {
+  const [categoryName, setCategoryName] = useState("");
+  const { user } = useAuth();
 
-  const handleAddCategory = () => {
-    addCategory(type, category, subcategory || null);
-    setCategory("");
-    setSubcategory("");
+  const handleAddCategory = async () => {
+    try {
+      const response = await api.post(
+        "/category",
+        {
+          name: categoryName,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${user.token}`,
+          },
+        }
+      );
+
+      if (response.status !== 201) {
+        alert("Category adding failed");
+        return;
+      }
+
+      setCategories([...categories, response.data?.category]);
+
+      alert("Category added successfully");
+    } catch (error) {
+      console.error("Error adding category:", error);
+    }
   };
 
   return (
     <Box sx={{ mt: 4, mb: 2 }}>
       <Typography variant="h6">Manage Categories</Typography>
-      <FormControl fullWidth sx={{ mb: 2 }}>
-        <InputLabel>Type</InputLabel>
-        <Select value={type} onChange={(e) => setType(e.target.value)}>
-          <MenuItem value="Income">Income</MenuItem>
-          <MenuItem value="Expense">Expense</MenuItem>
-        </Select>
-      </FormControl>
       <TextField
-        label="Category"
-        value={category}
-        onChange={(e) => setCategory(e.target.value)}
-        variant="outlined"
-        fullWidth
-        sx={{ mb: 2 }}
-      />
-      <TextField
-        label="Subcategory (Optional)"
-        value={subcategory}
-        onChange={(e) => setSubcategory(e.target.value)}
+        label="Category Name"
+        value={categoryName}
+        onChange={(e) => setCategoryName(e.target.value)}
         variant="outlined"
         fullWidth
         sx={{ mb: 2 }}
@@ -50,6 +48,16 @@ const CategoryManager = ({ categories, addCategory }) => {
       <Button variant="contained" color="primary" onClick={handleAddCategory}>
         Add Category
       </Button>
+      {categories.length > 0 && (
+        <Grid item xs={12}>
+          <Typography variant="body1">Existing Categories:</Typography>
+          <ul>
+            {categories.map((category) => (
+              <li key={category._id}>{category.name}</li>
+            ))}
+          </ul>
+        </Grid>
+      )}
     </Box>
   );
 };

@@ -1,27 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { TextField, Button, Grid, Typography } from "@mui/material";
 import api from "../api"; // Import the API utility
 import { useAuth } from "../context/AuthContext";
 
-const AccountManager = () => {
-  const [accounts, setAccounts] = useState([]);
+const AccountManager = ({ accounts, setAccounts }) => {
   const [accountName, setAccountName] = useState("");
   const [initialBalance, setInitialBalance] = useState("");
   const { user } = useAuth();
-
-  useEffect(() => {
-    const fetchAccounts = async () => {
-      try {
-        const response = await api.get("/accounts");
-        console.log("Accounts:", response.data);
-        setAccounts(response.data);
-      } catch (error) {
-        console.error("Error fetching accounts:", error);
-      }
-    };
-
-    fetchAccounts();
-  }, []);
 
   const addAccount = async (name, balance) => {
     try {

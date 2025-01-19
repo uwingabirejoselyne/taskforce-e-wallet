@@ -29,6 +29,8 @@ const MainPage = () => {
   const [openSubcategoryModal, setOpenSubcategoryModal] = useState(false);
   const [openAccountModal, setOpenAccountModal] = useState(false);
   const [openBudgetModal, setOpenBudgetModal] = useState(false);
+  const [categories, setCategories] = useState([]);
+  const [accounts, setAccounts] = useState([]);
   const [budget, setBudget] = useState(0);
   const { user } = useAuth();
 
@@ -81,6 +83,33 @@ const MainPage = () => {
     fetchBudget();
   }, []);
 
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await api.get("/category");
+
+        setCategories(response.data);
+      } catch (error) {
+        console.error("Error fetching Category:", error);
+      }
+    };
+
+    fetchCategories();
+  }, []);
+
+  useEffect(() => {
+    const fetchAccounts = async () => {
+      try {
+        const response = await api.get("/accounts");
+        setAccounts(response.data);
+      } catch (error) {
+        console.error("Error fetching accounts:", error);
+      }
+    };
+
+    fetchAccounts();
+  }, []);
+
   return (
     <Box>
       <Typography variant="h4" gutterBottom>
@@ -106,13 +135,6 @@ const MainPage = () => {
           onClick={() => setOpenCategoryModal(true)}
         >
           Manage Categories
-        </Button>
-        <Button
-          variant="contained"
-          color="success"
-          onClick={() => setOpenSubcategoryModal(true)}
-        >
-          Manage Subcategories
         </Button>
         <Button
           variant="contained"
@@ -245,11 +267,7 @@ const MainPage = () => {
         onClose={() => setOpenTransactionModal(false)}
         title="Add Transaction"
       >
-        <TransactionForm
-          addTransaction={(transaction) => console.log(transaction)}
-          categories={["Food", "Travel", "Entertainment"]}
-          subcategories={["Groceries", "Fuel"]}
-        />
+        <TransactionForm categories={categories} accounts={accounts} />
       </ModalWrapper>
 
       <ModalWrapper
@@ -258,8 +276,8 @@ const MainPage = () => {
         title="Manage Categories"
       >
         <CategoryManager
-          categories={["Food", "Travel"]}
-          addCategory={(category) => console.log("Added category:", category)}
+          categories={categories}
+          setCategories={setCategories}
         />
       </ModalWrapper>
 
@@ -285,7 +303,7 @@ const MainPage = () => {
         onClose={() => setOpenAccountModal(false)}
         title="Manage Accounts"
       >
-        <AccountManager />
+        <AccountManager accounts={accounts} setAccounts={setAccounts} />
       </ModalWrapper>
 
       <ModalWrapper
