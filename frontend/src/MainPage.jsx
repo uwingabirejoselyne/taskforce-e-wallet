@@ -32,36 +32,9 @@ const MainPage = () => {
   const [categories, setCategories] = useState([]);
   const [accounts, setAccounts] = useState([]);
   const [budget, setBudget] = useState(0);
+  const [transactions, setTransactions] = useState([]);
+  const [incomeExpenseData, setIncomeExpenseData] = useState([]);
   const { user } = useAuth();
-
-  // Mock Data
-  const transactions = [
-    {
-      id: 1,
-      description: "Salary",
-      amount: 2000,
-      type: "Income",
-      account: "Equity Bank",
-      category: "Work",
-      subcategory: "Bonus",
-      date: "2025-01-01",
-    },
-    {
-      id: 2,
-      description: "Groceries",
-      amount: -150,
-      type: "Expense",
-      account: "Mobile Money",
-      category: "Food",
-      subcategory: "Groceries",
-      date: "2025-01-02",
-    },
-  ];
-
-  const incomeExpenseData = [
-    { type: "Income", amount: 2000 },
-    { type: "Expense", amount: 500 },
-  ];
 
   const categoryData = [
     { category: "Food", amount: 200 },
@@ -108,6 +81,43 @@ const MainPage = () => {
     };
 
     fetchAccounts();
+  }, []);
+
+  useEffect(() => {
+    const fetchTransactions = async () => {
+      try {
+        const response = await api.get("/transactions");
+        setTransactions(
+          response.data.map((transaction) => ({
+            id: transaction._id,
+            description: transaction.description,
+            amount: transaction.amount,
+            type: transaction.type,
+            account: transaction.accountId.name,
+            category: categories.find(
+              (cat) => cat._id === transaction.categoryId
+            ),
+            date: transaction.date,
+          }))
+        );
+
+        const income = response.data
+          .filter((transaction) => transaction.type === "income")
+          .reduce((acc, curr) => acc + curr.amount, 0);
+        const expense = response.data
+          .filter((transaction) => transaction.type === "expense")
+          .reduce((acc, curr) => acc + curr.amount, 0);
+
+        setIncomeExpenseData([
+          { type: "Income", amount: income },
+          { type: "Expense", amount: expense },
+        ]);
+      } catch (error) {
+        console.error("Error fetching accounts:", error);
+      }
+    };
+
+    fetchTransactions();
   }, []);
 
   return (
@@ -159,7 +169,12 @@ const MainPage = () => {
             <CardContent>
               <Typography variant="h6">Total Income</Typography>
               <Typography variant="h4" color="primary">
-                $2000
+                {new Intl.NumberFormat("en-US").format(
+                  transactions
+                    .filter((transaction) => transaction.type === "income")
+                    .reduce((acc, curr) => acc + curr.amount, 0)
+                )}{" "}
+                Rwf
               </Typography>
             </CardContent>
           </Card>
@@ -169,7 +184,12 @@ const MainPage = () => {
             <CardContent>
               <Typography variant="h6">Total Expenses</Typography>
               <Typography variant="h4" color="error">
-                $500
+                {new Intl.NumberFormat("en-US").format(
+                  transactions
+                    .filter((transaction) => transaction.type === "expense")
+                    .reduce((acc, curr) => acc + curr.amount, 0)
+                )}{" "}
+                Rwf
               </Typography>
             </CardContent>
           </Card>
@@ -179,7 +199,15 @@ const MainPage = () => {
             <CardContent>
               <Typography variant="h6">Balance</Typography>
               <Typography variant="h4" color="success">
-                $1500
+                {new Intl.NumberFormat("en-US").format(
+                  transactions
+                    .filter((transaction) => transaction.type === "income")
+                    .reduce((acc, curr) => acc + curr.amount, 0) -
+                    transactions
+                      .filter((transaction) => transaction.type === "expense")
+                      .reduce((acc, curr) => acc + curr.amount, 0)
+                )}{" "}
+                Rwf
               </Typography>
             </CardContent>
           </Card>
@@ -212,7 +240,6 @@ const MainPage = () => {
                     <TableCell>Type</TableCell>
                     <TableCell>Account</TableCell>
                     <TableCell>Category</TableCell>
-                    <TableCell>Subcategory</TableCell>
                     <TableCell>Date</TableCell>
                   </TableRow>
                 </TableHead>
@@ -220,11 +247,15 @@ const MainPage = () => {
                   {transactions.map((transaction) => (
                     <TableRow key={transaction.id}>
                       <TableCell>{transaction.description}</TableCell>
-                      <TableCell>${transaction.amount.toFixed(2)}</TableCell>
+                      <TableCell>
+                        {new Intl.NumberFormat("en-US").format(
+                          transaction.amount
+                        )}{" "}
+                        Rwf
+                      </TableCell>
                       <TableCell>{transaction.type}</TableCell>
                       <TableCell>{transaction.account}</TableCell>
                       <TableCell>{transaction.category}</TableCell>
-                      <TableCell>{transaction.subcategory}</TableCell>
                       <TableCell>{transaction.date}</TableCell>
                     </TableRow>
                   ))}
