@@ -1,19 +1,27 @@
 const asyncHandler = require("express-async-handler");
 const Account = require("../models/accountModel");
 
-// Add a new account
 const addAccount = asyncHandler(async (req, res) => {
-  const { name,balance } = req.body;
- 
-  const account = await Account.create({
-    userId: req.user._id,
-    name,
-    balance
-  });
+  try {
+    const { name, balance } = req.body;
 
-  res.status(201).json(account);
+    // Ensure name and balance are provided
+    if (!name || balance === undefined) {
+      return res.status(400).json({ message: "Name and balance are required." });
+    }
+
+    // Create a new account
+    const account = await Account.create({
+      userId: req.user._id,
+      name,
+      balance
+    });
+
+    res.status(201).json(account);
+  } catch (error) {
+    console.error("Error adding account:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
 });
 
-
-
-module.exports = { addAccount};
+module.exports = { addAccount };

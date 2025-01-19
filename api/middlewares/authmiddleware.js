@@ -29,18 +29,4 @@ const authMiddleware = asyncHandler(async (req, res, next) => {
   return res.status(401).json({ message: "Authorization header missing or invalid" });
 });
 
-const isUser = async (req, res, next) => {
-  const { email } = req.user;
-
-  try {
-    const standardUser = await User.findOne({ email });
-    if (!standardUser || standardUser.standard !== "user") {
-      return res.status(403).json({ message: "You are not authorized as a user" });
-    }
-    next();
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
-module.exports = { authMiddleware, isUser };
+module.exports = { authMiddleware };
