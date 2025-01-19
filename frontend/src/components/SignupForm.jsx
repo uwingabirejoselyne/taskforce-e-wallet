@@ -1,6 +1,7 @@
 import React, { useState } from "react";
-import { TextField, Button, Box, Typography, Link } from "@mui/material";
+import { TextField, Button, Box, Typography } from "@mui/material";
 import api from "../api";
+import { Link } from "react-router";
 
 const SignupForm = () => {
   const [firstName, setFirstName] = useState("");
@@ -81,7 +82,7 @@ const SignupForm = () => {
       </Button>
 
       <Typography variant="body" gutterBottom>
-        Have account already? <Link href="/">Login Here</Link>
+        Have account already? <Link to="/">Login Here</Link>
       </Typography>
     </Box>
   );
