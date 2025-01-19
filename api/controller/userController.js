@@ -41,7 +41,6 @@ const loginUser = async (req, res) => {
         firstname: findUser?.firstname,
         lastname: findUser?.lastname,
         email: findUser?.email,
-        password: findUser?.password,
         token: generatedToken(findUser?._id),
       });
     } else {
