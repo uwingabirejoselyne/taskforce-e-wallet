@@ -259,8 +259,6 @@ const MainPage = () => {
         title="Manage Accounts"
       >
         <AccountManager
-          accounts={["Savings", "Checking"]}
-          addAccount={(account) => console.log("Added account:", account)}
         />
       </ModalWrapper>
 

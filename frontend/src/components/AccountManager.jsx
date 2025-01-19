@@ -1,10 +1,33 @@
-// components/AccountManager.jsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { TextField, Button, Grid, Typography } from "@mui/material";
+import api from "../api"; // Import the API utility
 
-const AccountManager = ({ accounts, addAccount }) => {
+const AccountManager = () => {
+  const [accounts, setAccounts] = useState([]);
   const [accountName, setAccountName] = useState("");
   const [initialBalance, setInitialBalance] = useState("");
+
+  useEffect(() => {
+    const fetchAccounts = async () => {
+      try {
+        const response = await api.get("/accounts");
+        setAccounts(response.data);
+      } catch (error) {
+        console.error("Error fetching accounts:", error);
+      }
+    };
+
+    fetchAccounts();
+  }, []);
+
+  const addAccount = async (name, balance) => {
+    try {
+      const response = await api.post("/accounts", { name, balance });
+      setAccounts([...accounts, response.data]);
+    } catch (error) {
+      console.error("Error adding account:", error);
+    }
+  };
 
   const handleAddAccount = () => {
     if (accountName && initialBalance) {
@@ -41,13 +64,12 @@ const AccountManager = ({ accounts, addAccount }) => {
           Add Account
         </Button>
       </Grid>
-
       <Grid item xs={12}>
         <Typography variant="body1">Existing Accounts:</Typography>
         <ul>
-          {Object.keys(accounts).map((account, index) => (
-            <li key={index}>
-              {account} - ${accounts[account]}
+          {accounts.map((account) => (
+            <li key={account._id}>
+              {account.name} - ${account.balance.toFixed(2)}
             </li>
           ))}
         </ul>

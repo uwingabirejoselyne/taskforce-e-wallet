@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { TextField, Button, Box, Typography } from "@mui/material";
+import { TextField, Button, Box, Typography, Link } from "@mui/material";
 import { useAuth } from "../context/AuthContext.jsx";
 
 const LoginForm = () => {
@@ -40,6 +40,10 @@ const LoginForm = () => {
       <Button variant="contained" color="primary" onClick={handleLogin}>
         Login
       </Button>
+
+      <Typography variant="body" gutterBottom>
+        Have no account? <Link href="/signup">Sign Up Here</Link>
+      </Typography>
     </Box>
   );
 };
