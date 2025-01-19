@@ -24,4 +24,18 @@ const addAccount = asyncHandler(async (req, res) => {
   }
 });
 
-module.exports = { addAccount };
+const getAccounts = asyncHandler(async (req, res) => {
+  try {
+    const accounts = await Account.find({ userId: req.user._id });
+
+    res.status(200).json(accounts);
+  } catch (error) {
+    res.status(500).json({
+      message: "Failed to fetch accounts",
+      error: error.message, debugging
+    });
+  }
+});
+
+
+module.exports = { addAccount,getAccounts };
