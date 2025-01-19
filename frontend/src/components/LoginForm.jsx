@@ -1,18 +1,28 @@
 import React, { useState } from "react";
 import { TextField, Button, Box, Typography, Link } from "@mui/material";
 import { useAuth } from "../context/AuthContext.jsx";
+import api from "../api.js";
 
 const LoginForm = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const { login } = useAuth();
 
-  const handleLogin = () => {
-    // Validate credentials (simple example)
-    if (email === "test@example.com" && password === "password123") {
-      login({ email, name: "John Doe" });
-    } else {
-      alert("Invalid credentials");
+  const handleLogin = async () => {
+    try {
+      const response = await api.post("/user/login", {
+        email,
+        password,
+      });
+
+      if (response.status !== 200) {
+        alert("Login failed");
+        return;
+      }
+
+      login(response.data);
+    } catch (error) {
+      alert("User already exists");
     }
   };
 

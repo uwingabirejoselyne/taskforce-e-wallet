@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { TextField, Button, Box, Typography, Link } from "@mui/material";
-import { useAuth } from "../context/AuthContext";
 import api from "../api";
 
 const SignupForm = () => {
@@ -9,13 +8,27 @@ const SignupForm = () => {
   const [mobileNumber, setMobileNumber] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const { login } = useAuth();
 
   const handleSignup = async () => {
-    // Simple user creation (in real app, you would use an API to store user)
-    const response = await api.get("/user/register");
-    localStorage.setItem("user", JSON.stringify(newUser));
-    login(newUser);
+    try {
+      const response = await api.post("/user/register", {
+        firstname: firstName,
+        lastname: lastName,
+        mobile: mobileNumber,
+        email,
+        password,
+      });
+
+      if (response.status !== 201) {
+        alert("User creation failed");
+        return;
+      }
+
+      // redirect to login page
+      window.location.href = "/login";
+    } catch (error) {
+      alert("User already exists");
+    }
   };
 
   return (

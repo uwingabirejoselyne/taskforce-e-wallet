@@ -20,6 +20,7 @@ import CategoryManager from "./components/CategoryManager";
 import SubcategoryManager from "./components/SubcategoryManager";
 import AccountManager from "./components/AccountManager";
 import BudgetForm from "./components/BudgetForm";
+import { useAuth } from "./context/AuthContext";
 
 const MainPage = () => {
   const [openTransactionModal, setOpenTransactionModal] = useState(false);
@@ -27,6 +28,7 @@ const MainPage = () => {
   const [openSubcategoryModal, setOpenSubcategoryModal] = useState(false);
   const [openAccountModal, setOpenAccountModal] = useState(false);
   const [openBudgetModal, setOpenBudgetModal] = useState(false);
+  const { user } = useAuth();
 
   // Mock Data
   const transactions = [
@@ -67,7 +69,7 @@ const MainPage = () => {
   return (
     <Box>
       <Typography variant="h4" gutterBottom>
-        Hello User!
+        Hello {user?.firstname}!
       </Typography>
       <Typography variant="body1" gutterBottom>
         Welcome to your personal finance dashboard. Here you can manage your
@@ -258,8 +260,7 @@ const MainPage = () => {
         onClose={() => setOpenAccountModal(false)}
         title="Manage Accounts"
       >
-        <AccountManager
-        />
+        <AccountManager />
       </ModalWrapper>
 
       <ModalWrapper
