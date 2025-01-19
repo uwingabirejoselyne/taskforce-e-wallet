@@ -32,7 +32,7 @@ const addTransaction = asyncHandler(async (req, res) => {
     const transaction = await Transaction.create({
       ...req.body,
       userId: req.user._id,
-      category: type === "expense" ? categoryId : undefined,
+      category: categoryId,
     });
 
     // Update account balance
