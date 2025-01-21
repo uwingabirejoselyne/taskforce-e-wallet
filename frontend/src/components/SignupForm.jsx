@@ -9,8 +9,11 @@ const SignupForm = () => {
   const [mobileNumber, setMobileNumber] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleSignup = async () => {
+    setLoading(true);
+
     try {
       const response = await api.post("/user/register", {
         firstname: firstName,
@@ -20,15 +23,19 @@ const SignupForm = () => {
         password,
       });
 
+      setLoading(false);
+
       if (response.status !== 201) {
         alert("User creation failed");
         return;
       }
 
       // redirect to login page
-      window.location.href = "/login";
+      window.location.href = "/";
     } catch (error) {
-      alert("User already exists");
+      setLoading(false);
+      // display 500 error
+      alert("User creation failed");
     }
   };
 
@@ -77,8 +84,12 @@ const SignupForm = () => {
         fullWidth
         sx={{ mb: 2 }}
       />
-      <Button variant="contained" color="primary" onClick={handleSignup}>
-        Sign Up
+      <Button variant="contained" color="primary" onClick={handleSignup}
+        disabled={loading}
+      >
+      {
+        loading ? "Processing..." : "Sign Up"
+      }
       </Button>
 
       <Typography variant="body" gutterBottom>

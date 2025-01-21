@@ -7,14 +7,19 @@ import { Link } from "react-router";
 const LoginForm = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
   const { login } = useAuth();
 
   const handleLogin = async () => {
+    setLoading(true);
+
     try {
       const response = await api.post("/user/login", {
         email,
         password,
       });
+
+      setLoading(false);
 
       if (response.status !== 200) {
         alert("Login failed");
@@ -23,7 +28,8 @@ const LoginForm = () => {
 
       login(response.data);
     } catch (error) {
-      alert("User already exists");
+      setLoading(false);
+      alert("Login failed");
     }
   };
 
@@ -48,8 +54,9 @@ const LoginForm = () => {
         fullWidth
         sx={{ mb: 2 }}
       />
-      <Button variant="contained" color="primary" onClick={handleLogin}>
-        Login
+      <Button variant="contained" color="primary" onClick={handleLogin}
+        disabled={loading}>
+        {loading ? "Wait..." : "Login"}
       </Button>
 
       <Typography variant="body" gutterBottom>
